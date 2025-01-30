@@ -1,4 +1,3 @@
-const API_KEY = 'xxx';
 const SLICELEN = 31;
 const global = {
     currentPage: window.location.pathname.slice(SLICELEN),
@@ -13,8 +12,11 @@ function highlightActiveNavLink() {
     });
 }
 
-async function fetchTrending(mediaType) {
-    const url = `https://api.themoviedb.org/3/trending/${mediaType}/week?language=en-US`;
+async function fetchAPIData(endpoint) {
+    const API_KEY =
+        'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjNzNiYjk4YmViZjIzZjg4ODk5ZjE0OGZhZTZlNTlhNSIsIm5iZiI6MTczNzgzNjEwMy4zNjgsInN1YiI6IjY3OTU0NjQ3YTZlNDEyODNmMTJhZTc5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.4ntt2Gjy1yrz9ogxJgM8la9xmZdrG8CxO52KhGpukWg';
+    const api_URL = 'https://api.themoviedb.org/3';
+    const url = `${api_URL}/${endpoint}/week?language=en-US`;
 
     const options = {
         method: 'GET',
@@ -29,17 +31,24 @@ async function fetchTrending(mediaType) {
         if (!response.ok) {
             throw new Error(`Request Failed ${response.status}`);
         }
-        const result = await response.json();
-        const mediaList = result.results;
-
-        mediaList.forEach((media) => {
-            const card = cardGenerator(media);
-            const id = mediaType === 'movie' ? '#popular-movies' : '#popular-shows';
-            document.querySelector(id).appendChild(card);
-        });
+        return await response.json();
     } catch (error) {
         console.log(error);
     }
+}
+
+async function fetchTrending(mediaType) {
+    document.querySelector('.spinner').classList.toggle('show');
+
+    const result = await fetchAPIData(`trending/${mediaType}`);
+    const mediaList = result.results;
+
+    mediaList.forEach((media) => {
+        const card = cardGenerator(media);
+        const id = mediaType === 'movie' ? '#popular-movies' : '#popular-shows';
+        document.querySelector(id).appendChild(card);
+    });
+    document.querySelector('.spinner').classList.toggle('show');
 }
 
 function cardGenerator(media) {
@@ -51,7 +60,7 @@ function cardGenerator(media) {
 
     cardLink.setAttribute('href', `${href}?id=${media.id}`);
     const img = document.createElement('img');
-    img.setAttribute('src', `https://image.tmdb.org/t/p/original/${media.poster_path}`);
+    img.src = media.poster_path ? `https://image.tmdb.org/t/p/original/${media.poster_path}` : './images/no-image.jpg';
     img.alt = media.media_type === 'movie' ? 'Movie Title' : 'Show Title';
     img.className = 'card-img-top';
     cardLink.appendChild(img);
@@ -60,12 +69,13 @@ function cardGenerator(media) {
     cardBody.className = 'card-body';
     const cardTitle = document.createElement('h5');
     cardTitle.className = 'card-title';
-    cardTitle.textmedia = media.title;
+    cardTitle.textContent = media.media_type === 'movie' ? media.title : media.name;
     const cardDesc = document.createElement('p');
     cardDesc.className = 'card-text';
     const cardRel = document.createElement('small');
     cardRel.className = 'text-muted';
-    cardRel.textmedia = `Release: ${media.release_date}`;
+    cardRel.textContent =
+        media.media_type === 'movie' ? `Release: ${media.release_date}` : `First Aired: ${media.first_air_date}`;
     cardDesc.appendChild(cardRel);
     cardBody.appendChild(cardTitle);
     cardBody.appendChild(cardDesc);
@@ -83,11 +93,9 @@ function init() {
             console.log('home');
             break;
         case '/movies.html':
-            console.log('movies');
             fetchTrending('movie');
             break;
         case '/shows.html':
-            console.log('shows');
             fetchTrending('tv');
             break;
         case '/movie-details.html':
