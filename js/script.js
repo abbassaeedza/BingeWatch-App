@@ -99,11 +99,30 @@ function addCommasToNum(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
+function displayBackdrop(backdropPath) {
+    const overlayDiv = document.createElement('div');
+    overlayDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original/${backdropPath})`;
+    overlayDiv.style.backgroundSize = 'cover';
+    overlayDiv.style.backgroundPosition = 'center';
+    overlayDiv.style.backgroundRepeat = 'no-repeat';
+    overlayDiv.style.height = '180vh';
+    overlayDiv.style.width = '100vw';
+    overlayDiv.style.position = 'absolute';
+    overlayDiv.style.top = '0';
+    overlayDiv.style.left = '0';
+    overlayDiv.style.zIndex = '-1';
+    overlayDiv.style.opacity = '0.1';
+
+    document.querySelector('#details').appendChild(overlayDiv);
+}
+
 async function fetchDetails(mediaType) {
     showSpinner();
 
     const mediaID = window.location.search.split('=')[1];
     const media = await fetchAPIData(`${mediaType}/${mediaID}`);
+
+    displayBackdrop(media.backdrop_path);
 
     const topDetails = document.createElement('div');
     topDetails.className = 'details-top';
