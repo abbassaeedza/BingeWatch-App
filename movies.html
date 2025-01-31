@@ -6,10 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap"
-            rel="stylesheet"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="lib/fontawesome.css" />
         <link rel="stylesheet" href="css/style.css" />
         <link rel="stylesheet" href="css/spinner.css" />
@@ -32,6 +29,21 @@
                 </nav>
             </div>
         </header>
+
+        <section class="search">
+            <div class="container">
+                <div id="alert"></div>
+                <form action="./search.html" class="search-form">
+                    <input type="hidden" id="movie" name="type" value="movie" />
+                    <div class="search-flex">
+                        <input type="text" name="search-term" id="search-term" placeholder="Enter search term" />
+                        <button class="btn" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
 
         <!-- Popular TV Shows -->
         <section class="container">
@@ -62,15 +74,9 @@
             <div class="container">
                 <div class="logo"><span>BingeWatch</span></div>
                 <div class="social-links">
-                    <a href="https://www.facebook.com" target="_blank"
-                        ><i class="fab fa-facebook-f"></i
-                    ></a>
-                    <a href="https://www.twitter.com" target="_blank"
-                        ><i class="fab fa-twitter"></i
-                    ></a>
-                    <a href="https://www.instagram.com" target="_blank"
-                        ><i class="fab fa-instagram"></i
-                    ></a>
+                    <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </footer>
