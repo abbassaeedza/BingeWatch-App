@@ -5,7 +5,8 @@ const global = {
         term: '',
         type: '',
         page: 1,
-        totalPage: 1,
+        totalPages: 1,
+        totalResults: 0,
     },
 };
 
@@ -42,8 +43,7 @@ function addCommasToNum(num) {
 }
 
 async function fetchAPIData(endpoint) {
-    const API_KEY =
-        'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjNzNiYjk4YmViZjIzZjg4ODk5ZjE0OGZhZTZlNTlhNSIsIm5iZiI6MTczNzgzNjEwMy4zNjgsInN1YiI6IjY3OTU0NjQ3YTZlNDEyODNmMTJhZTc5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.4ntt2Gjy1yrz9ogxJgM8la9xmZdrG8CxO52KhGpukWg';
+    const API_KEY = 'xxx';
     const api_URL = 'https://api.themoviedb.org/3';
     const url = `${api_URL}/${endpoint}`;
 
@@ -72,34 +72,70 @@ async function searchMedia() {
     global.search.type = urlParams.get('type');
     global.search.term = urlParams.get('search-term');
 
-    if (global.search.term === '' || !global.search.term) {
+    if (global.search.term === '' || !global.search.term || !global.search.type || global.search.type === '') {
         location.href = './';
     }
 
     showSpinner();
-    const searchResult = await fetchAPIData(
-        `search/${global.search.type ? (global.search.type === 'movie' ? 'movie' : 'tv') : 'multi'}?query=${
-            global.search.term
-        }`
+    document.querySelector('#search-results-heading').innerHTML = '';
+    document.querySelector('#search-results').innerHTML = '';
+    document.querySelector('#pagination').innerHTML = '';
+
+    const { page, results, total_pages, total_results } = await fetchAPIData(
+        `search/${global.search.type}?query=${global.search.term}&page=${global.search.page}`
     );
-    const MixResults = searchResult.results;
 
-    const results = MixResults.filter((result) => result.media_type != 'person');
+    global.search.page = page;
+    global.search.totalPages = total_pages;
+    global.search.totalResults = total_results;
 
-    if (results.lenght === 0) {
+    if (results.length === 0) {
         showAlert('no record found');
+        hideSpinner();
         return;
     }
+    const resultHeading = document.querySelector('#search-results-heading');
+    resultHeading.innerHTML = `<h2>${results.length} of ${global.search.totalResults} Results for ${global.search.term}`;
 
-    results.map((result) => {
-        const card = cardGenerator(result, global.search.type);
+    results.map((media) => {
+        const card = cardGenerator(media, global.search.type);
         document.querySelector('#search-results').appendChild(card);
     });
 
-    const pageCounter = document.querySelector('.page-counter');
-    pageCounter.textContent = `${searchResult.page} of ${searchResult.total_pages}`;
-
+    displayPagination();
     hideSpinner();
+}
+
+function displayPagination() {
+    const pagination = document.createElement('div');
+    pagination.innerHTML = `
+                <div class="pagination">
+                    <button class="btn btn-primary" id="prev">Prev</button>
+                    <button class="btn btn-primary" id="next">Next</button>
+                    <div class="page-counter">Page ${global.search.page} of ${global.search.totalPages}</div>
+                </div>`;
+
+    document.querySelector('#pagination').appendChild(pagination);
+
+    const prevBtn = document.querySelector('#prev');
+    const nextBtn = document.querySelector('#next');
+
+    if (global.search.page === 1) {
+        prevBtn.disabled = true;
+    }
+    if (global.search.page === global.search.total_pages) {
+        nextBtn.disabled = true;
+    }
+
+    nextBtn.addEventListener('click', async () => {
+        global.search.page++;
+        searchMedia();
+    });
+
+    prevBtn.addEventListener('click', async () => {
+        global.search.page--;
+        searchMedia();
+    });
 }
 
 function checkForNullSearch(e) {
@@ -191,7 +227,7 @@ function cardGenerator(media, mediaType) {
 
     cardLink.setAttribute('href', `${href}?id=${media.id}`);
     const img = document.createElement('img');
-    img.src = media.poster_path ? `https://image.tmdb.org/t/p/w500/${media.poster_path}` : './images/no-image.jpg';
+    img.src = media.poster_path ? `https://image.tmdb.org/t/p/original/${media.poster_path}` : './images/no-image.jpg';
     img.alt = type === 'movie' ? 'Movie Title' : 'Show Title';
     img.className = 'card-img-top';
     cardLink.appendChild(img);

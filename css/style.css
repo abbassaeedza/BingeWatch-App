@@ -62,6 +62,7 @@ ul {
 }
 
 .btn:disabled {
+    background: var(--color-secondary);
     border-color: #ccc;
     cursor: not-allowed;
 }
